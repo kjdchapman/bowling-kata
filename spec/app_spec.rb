@@ -1,34 +1,5 @@
-require "rspec"
-
-class Bowling
-  def self.score(frames)
-    total = 0
-
-    frames.each do |frame|
-      total += score_first_ball(frame[0])
-      total += score_second_ball(frame[1])
-
-      set_next_frame_bonuses(frame)
-    end
-
-    total
-  end
-
-  def self.set_next_frame_bonuses(frame)
-    @strike = frame[0] == 10
-    @spare = frame[0] + frame[1] == 10
-  end
-
-  def self.score_first_ball(ball)
-    multiplier = @strike || @spare ? 2 : 1
-    ball * multiplier
-  end
-
-  def self.score_second_ball(ball)
-    multiplier = @strike ? 2 : 1
-    ball * multiplier
-  end
-end
+require 'rspec'
+require './lib/bowling'
 
 describe 'bowling' do
   let(:result) { Bowling.score(frames) }
@@ -146,13 +117,26 @@ describe 'bowling' do
 
     context 'with a spare' do
       let(:first_frame) { [0, 0] }
-      let(:second_frame) { [5,5] }
+      let(:second_frame) { [5, 5] }
 
       context 'followed by striking one pin' do
         let(:third_frame) { [1, 0] }
 
         it "scores 12" do
           expect(result).to eq 12
+        end
+      end
+    end
+
+    context 'with a strike in first frame, then strike in second' do
+      let(:first_frame) { [10, 0] }
+      let(:second_frame) { [10, 0] }
+
+      context '1 pin struck in the third' do
+        let(:third_frame) { [1, 0] }
+
+        it 'score 33' do
+          expect(result).to eq 33
         end
       end
     end
@@ -165,6 +149,33 @@ describe 'bowling' do
 
       it "scores 1" do
         expect(result).to eq 1
+      end
+    end
+
+    xcontext 'each of the rolls strikes one pin' do
+      let(:empty_frame) { [0, 0] }
+      let(:frames) { Array.new(9, empty_frame) << [1, 1, 1] }
+
+      it 'scores 3' do
+        expect(result).to eq 3
+      end
+    end
+
+    xcontext 'ten with the first two balls, then one more pin' do
+      let(:empty_frame) { [0, 0] }
+      let(:frames) { Array.new(9, empty_frame) << [9, 1, 1] }
+
+      it 'scores 12' do
+        expect(result).to eq 12
+      end
+    end
+
+    xcontext 'ten with the first ball, one with the second' do
+      let(:empty_frame) { [0, 0] }
+      let(:frames) { Array.new(9, empty_frame) << [10, 1, 0] }
+
+      it 'scores 12' do
+        expect(result).to eq 12
       end
     end
   end
